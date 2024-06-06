@@ -1,0 +1,32 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Search Engine</h1>
+    <form method="get" action="/websearch" class="search-form">
+        <div class="input-group">
+            <input type="text" placeholder="Search..." name="query" id="query" required>
+            <button type="submit" class="submit-button">Search</button>
+        </div>
+        <div class="select-group">
+            <label for="model_type">Select search model:</label>
+            <select id="model_type" name="model_type">
+                <option value="bm25">BM25</option>
+                <option value="vector">Vector Model</option>
+                <option value="combined">Combined BM25 and Vector</option>
+            </select>
+        </div>
+        <div class="checkbox-group">
+            <label>
+                <input type="checkbox" name="use_pagerank" checked> Sort by PageRank
+            </label>
+            <label>
+                <input type="checkbox" name="use_model_score" checked> Sort by model score
+            </label>
+        </div>
+    </form>
+</div>
+{% endblock %}

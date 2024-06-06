@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block title %}Search Results{% endblock %}
+
+{% block content %}
+    <form method="get" action="/websearch" class="search-form">
+        <div class="input-group">
+            <input type="text" placeholder="Search..." name="query" id="query" value="{{ query }}" required>
+            <button type="submit" class="submit-button">Search</button>
+        </div>
+        <div class="select-group">
+            <label for="model_type">Select search model:</label>
+            <select id="model_type" name="model_type">
+                {% if model_type == 'bm25' %}
+                    <option value="bm25" selected>BM25</option>
+                {% else %}
+                    <option value="bm25">BM25</option>
+                {% endif %}
+                {% if model_type == 'vector' %}
+                    <option value="vector" selected>Vector Model</option>
+                {% else %}
+                    <option value="vector">Vector Model</option>
+                {% endif %}
+                {% if model_type == 'combined' %}
+                    <option value="combined" selected>Combined BM25 and Vector</option>
+                {% else %}
+                    <option value="combined">Combined BM25 and Vector</option>
+                {% endif %}
+            </select>
+        </div>
+        <label>
+            {% if use_pagerank == 'on' %}
+                <input type="checkbox" name="use_pagerank" value="on" checked="checked"> Sort by PageRank
+            {% else %}
+                <input type="checkbox" name="use_pagerank" value="on"> Sort by PageRank
+            {% endif %}
+        </label>
+        <label>
+            {% if use_model_score == 'on' %}
+                <input type="checkbox" name="use_model_score" value="on" checked="checked"> Sort by model score
+            {% else %}
+                <input type="checkbox" name="use_model_score" value="on"> Sort by model score
+            {% endif %}
+        </label>
+    </form>
+
+    <h4>Showing results for "{{query}}" </h4>
+    {% if results %}
+        <ul>
+        {% for doc_id, info in results %}
+            <li class="result-item">
+                <div class="indicator {{info.rank_group}}"></div>
+                <div class="result-content">
+                    <strong><a href="{{info.url}}">{{info.title}}</a></strong>
+                    <p>{{info.url}}</p>
+                </div>
+                <div class="result-meta">
+                    <p>ID: {{doc_id}}</p>
+                    <p>Pagerank: {{'%.3f' % info.pagerank}}</p>
+                    <p>Model score: {{'%.3f' % info.model_score}}</p>
+                    <p>Total score: {{'%.3f' % info.total_score}}</p>
+                </div>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No results</p>
+    {% endif %}
+    {% if total_results > per_page %}
+    <div class="pagination">
+        {% if page > 1 %}
+        <a href="{{ url_for('search', query=query, model_type=model_type, use_pagerank=use_pagerank, use_model_score=use_model_score, page=page-1) }}">Previous</a>
+        {% endif %}
+
+        {% if pagination_pages[0] > 1 %}
+        <a href="{{ url_for('search', query=query, model_type=model_type, use_pagerank=use_pagerank, use_model_score=use_model_score, page=1) }}">1</a>
+        {% if pagination_pages[0] > 2 %}
+        <span>...</span>
+        {% endif %}
+        {% endif %}
+
+        {% for p in pagination_pages %}
+        <a href="{{ url_for('search', query=query, model_type=model_type, use_pagerank=use_pagerank, use_model_score=use_model_score, page=p) }}" class="{{ 'active' if p == page else '' }}">{{ p }}</a>
+        {% endfor %}
+
+        {% if pagination_pages[-1] < last_page %}
+        {% if pagination_pages[-1] < last_page - 1 %}
+        <span>...</span>
+        {% endif %}
+        <a href="{{ url_for('search', query=query, model_type=model_type, use_pagerank=use_pagerank, use_model_score=use_model_score, page=last_page) }}">{{ last_page }}</a>
+        {% endif %}
+
+        {% if page < last_page %}
+        <a href="{{ url_for('search', query=query, model_type=model_type, use_pagerank=use_pagerank, use_model_score=use_model_score, page=page+1) }}">Next</a>
+        {% endif %}
+    </div>
+
+
+    {% endif %}
+{% endblock %}
